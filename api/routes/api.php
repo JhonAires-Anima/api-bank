@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::post('evento', 'App\Http\Controllers\ApiController@event');
-Route::post('balance', 'App\Http\Controllers\ApiController@balance');
+Route::get('balance', 'App\Http\Controllers\ApiController@balance');
 Route::post('reset', 'App\Http\Controllers\ApiController@reset');
 // Route::get('showById', 'App\Http\Controllers\BankController@showById');
 

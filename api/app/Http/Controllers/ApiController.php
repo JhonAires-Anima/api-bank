@@ -265,8 +265,17 @@ class ApiController extends Controller
         }
     }
 
-    public function balance() {
+    public function balance(Request $request) {
+        $id = $request->input('id');
+        $accountExists = Account::where('id', $id)->select('id')->exists();
 
+        if ($accountExists) {
+            $res  = Account::where('id', $id)->select('balance')->get();
+
+            return $this->sendResponse($res, 'Account balance', 200);
+        }
+
+        return $this->sendError('Invalid account', 'Account not found', 404);
     }
 
     public function reset() {
