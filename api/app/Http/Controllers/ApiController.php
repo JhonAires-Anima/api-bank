@@ -9,8 +9,6 @@ use App\Models\Transfers;
 use App\Models\Withdrawals;
 use Illuminate\Support\Facades\Schema;
 use stdClass;
-use Illuminate\Support\Facades\Mail;
-use App\Mail\TokenMail;
 class ApiController extends Controller
 {
     public function sendResponse($result, $message)
@@ -247,18 +245,6 @@ class ApiController extends Controller
 
                 if (strlen($origin) !== 0 ) {
                     if (strlen($destination) !== 0 ) {
-                        if (strlen($amount) !== 0 && $integerAmount >= 1000 ) {
-                            $token = random_int(100000, 999999);
-                                /*$details = [
-                                'title' => 'Mail from api bank',
-                                'body' => $token
-                            ];
-
-                            Mail::to('jhon.aires@anima.edu.uy')->send(new TokenMail($details));
-                            dd('email is sent'); */
-                            return $token;
-                        }
-
                         if (strlen($amount) !== 0) {
                             return $this->transfer($origin, $destination, $amount);
                         }
