@@ -7,8 +7,10 @@ use App\Models\Account;
 use App\Models\Deposits;
 use App\Models\Transfers;
 use App\Models\Withdrawals;
+use Illuminate\Support\Facades\Schema;
 use stdClass;
-
+use Illuminate\Support\Facades\Mail;
+use App\Mail\TokenMail;
 class ApiController extends Controller
 {
     public function sendResponse($result, $message)
@@ -241,10 +243,23 @@ class ApiController extends Controller
                 $origin = $request->input('origen');
                 $destination = $request->input('destino');
                 $amount = $request->input('monto');
+                $integerAmount = $amount + 0;
 
                 if (strlen($origin) !== 0 ) {
                     if (strlen($destination) !== 0 ) {
-                        if (strlen($amount) !== 0 ) {
+                        if (strlen($amount) !== 0 && $integerAmount >= 1000 ) {
+                            $token = random_int(100000, 999999);
+                                /*$details = [
+                                'title' => 'Mail from api bank',
+                                'body' => $token
+                            ];
+
+                            Mail::to('jhon.aires@anima.edu.uy')->send(new TokenMail($details));
+                            dd('email is sent'); */
+                            return $token;
+                        }
+
+                        if (strlen($amount) !== 0) {
                             return $this->transfer($origin, $destination, $amount);
                         }
 
@@ -279,6 +294,63 @@ class ApiController extends Controller
     }
 
     public function reset() {
+    
+        Schema::dropIfExists('withdrawals');
+        Schema::dropIfExists('transfers');
+        Schema::dropIfExists('deposits');
+        Schema::dropIfExists('accounts');
+
+        if (!Schema::hasTable('accounts')){
+            
+            Schema::create('accounts', function($table){
+                $table->integer('id');
+                $table->char('email', 200);
+                $table->integer('balance');
+                
+                $table->primary('id');
+            });
+        }
         
+        if (!Schema::hasTable('deposits')){
+            
+            Schema::create('deposits', function($table){
+            $table->increments('id_deposit', 10);
+            $table->integer('id_destino');
+            $table->integer('monto');
+
+            $table->foreign('id_destino')->references('id')->on('accounts');
+            });
+
+        }
+        
+        if (!Schema::hasTable('transfers')){
+
+            Schema::create('transfers', function($table){
+            $table->increments('id_transfer');
+            $table->integer('id_origen');
+            $table->integer('id_destino');
+            $table->integer('monto');
+            
+            $table->foreign('id_origen')->references('id')->on('accounts');
+            $table->foreign('id_destino')->references('id')->on('accounts');
+            });
+        }
+
+        if (!Schema::hasTable('withdrawals')){
+
+            Schema::create('withdrawals', function($table){
+                $table->increments('id_withdrawals', 20);
+                $table->integer('id_origen');
+                $table->integer('monto');
+            
+                $table->foreign('id_origen')->references('id')->on('accounts');
+            });
+        }
+
+        if (Schema::hasTable('accounts') && Schema::hasTable('deposits') && Schema::hasTable('transfers') && Schema::hasTable('withdrawals')) {
+            return $this->sendResponse('Reset', 'Database Reseted correctly', 200);
+        } else {
+            return $this->sendError('Error when reset', 'Unexpected error', 404);
+        }
     }
 }
