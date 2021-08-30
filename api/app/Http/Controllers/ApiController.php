@@ -241,7 +241,6 @@ class ApiController extends Controller
                 $origin = $request->input('origen');
                 $destination = $request->input('destino');
                 $amount = $request->input('monto');
-                $integerAmount = $amount + 0;
 
                 if (strlen($origin) !== 0 ) {
                     if (strlen($destination) !== 0 ) {
